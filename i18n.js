@@ -284,7 +284,10 @@ module.exports = (function() {
   i18n.__l = function i18nTranslationList(phrase) {
     var translations = [];
     Object.keys(locales).sort().forEach(function(l) {
-      translations.push(i18n.__({ phrase: phrase, locale: l }));
+      translations.push(i18n.__({
+        phrase: phrase,
+        locale: l
+      }));
     });
     return translations;
   };
@@ -293,7 +296,10 @@ module.exports = (function() {
     var translations = [];
     Object.keys(locales).sort().forEach(function(l) {
       var hash = {};
-      hash[l] = i18n.__({ phrase: phrase, locale: l });
+      hash[l] = i18n.__({
+        phrase: phrase,
+        locale: l
+      });
       translations.push(hash);
     });
     return translations;
@@ -367,7 +373,9 @@ module.exports = (function() {
       } else {
         // split locales with a region code
         var lc = targetLocale.toLowerCase().split(/[_-\s]+/)
-          .filter(function(el){ return true && el; });
+          .filter(function(el) {
+            return true && el;
+          });
         // take the first part of locale, fallback to full locale
         p = new MakePlural(lc[0] || targetLocale);
         PluralsForLocale[targetLocale] = p;
@@ -539,7 +547,7 @@ module.exports = (function() {
     }
 
     // if the msg string contains {{Mustache}} patterns we render it as a mini tempalate
-    if ((/{{.*}}/).test(msg)) {
+    if (false && (/{{.*}}/).test(msg)) {
       msg = Mustache.render(msg, namedValues);
     }
 
@@ -647,7 +655,7 @@ module.exports = (function() {
 
   var guessLanguage = function(request) {
     if (typeof request === 'object') {
-      var languageHeader = request.headers? request.headers['accept-language'] : undefined,
+      var languageHeader = request.headers ? request.headers['accept-language'] : undefined,
         languages = [],
         regions = [];
 
@@ -694,7 +702,7 @@ module.exports = (function() {
             // where the original, unsupported language existed.
             var acceptedLanguageIndex = acceptedLanguages.indexOf(lang);
             var fallbackIndex = acceptedLanguages.indexOf(fallback);
-            if(fallbackIndex > -1) {
+            if (fallbackIndex > -1) {
               acceptedLanguages.splice(fallbackIndex, 1);
             }
             acceptedLanguages.splice(acceptedLanguageIndex + 1, 0, fallback);
