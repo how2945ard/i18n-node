@@ -23,6 +23,8 @@ var vsprintf = require('sprintf-js').vsprintf,
   ),
   parseInterval = require('math-interval-parser').default;
 
+Mustache.tags = ['#{', '}#'];
+
 // exports an instance
 module.exports = (function() {
 
@@ -547,7 +549,7 @@ module.exports = (function() {
     }
 
     // if the msg string contains {{Mustache}} patterns we render it as a mini tempalate
-    if (false && (/{{.*}}/).test(msg)) {
+    if ((/#{.*}#/).test(msg)) {
       msg = Mustache.render(msg, namedValues);
     }
 
