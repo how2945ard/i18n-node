@@ -24,9 +24,12 @@ var vsprintf = require('sprintf-js').vsprintf,
   parseInterval = require('math-interval-parser').default;
 
 Mustache.tags = ['#{', '}#'];
+Mustache.escape = function (text) {
+  return text;
+};
 
 // exports an instance
-module.exports = (function() {
+module.exports = (function () {
 
   var MessageformatInstanceForLocale = {},
     PluralsForLocale = {},
@@ -93,7 +96,7 @@ module.exports = (function() {
       // or give an array objects to register to
       if (Array.isArray(opt.register)) {
         register = opt.register;
-        register.forEach(function(r) {
+        register.forEach(function (r) {
           applyAPItoObject(r);
         });
       } else {
@@ -157,7 +160,7 @@ module.exports = (function() {
     // implicitly read all locales
     if (Array.isArray(opt.locales)) {
 
-      opt.locales.forEach(function(l) {
+      opt.locales.forEach(function (l) {
         read(l);
       });
 
@@ -165,7 +168,7 @@ module.exports = (function() {
       if (autoReload) {
 
         // watch changes of locale files (it's called twice because fs.watch is still unstable)
-        fs.watch(directory, function(event, filename) {
+        fs.watch(directory, function (event, filename) {
           var localeFromFile = guessLocaleFromFile(filename);
 
           if (localeFromFile && opt.locales.indexOf(localeFromFile) > -1) {
@@ -285,7 +288,7 @@ module.exports = (function() {
 
   i18n.__l = function i18nTranslationList(phrase) {
     var translations = [];
-    Object.keys(locales).sort().forEach(function(l) {
+    Object.keys(locales).sort().forEach(function (l) {
       translations.push(i18n.__({
         phrase: phrase,
         locale: l
@@ -296,7 +299,7 @@ module.exports = (function() {
 
   i18n.__h = function i18nTranslationHash(phrase) {
     var translations = [];
-    Object.keys(locales).sort().forEach(function(l) {
+    Object.keys(locales).sort().forEach(function (l) {
       var hash = {};
       hash[l] = i18n.__({
         phrase: phrase,
@@ -375,7 +378,7 @@ module.exports = (function() {
       } else {
         // split locales with a region code
         var lc = targetLocale.toLowerCase().split(/[_-\s]+/)
-          .filter(function(el) {
+          .filter(function (el) {
             return true && el;
           });
         // take the first part of locale, fallback to full locale
@@ -422,7 +425,7 @@ module.exports = (function() {
     // consider any extra registered objects
     if (typeof register === 'object') {
       if (Array.isArray(register) && !skipImplicitObjects) {
-        register.forEach(function(r) {
+        register.forEach(function (r) {
           r.locale = targetObject.locale;
         });
       } else {
@@ -536,7 +539,7 @@ module.exports = (function() {
   // = private methods =
   // ===================
 
-  var postProcess = function(msg, namedValues, args, count) {
+  var postProcess = function (msg, namedValues, args, count) {
 
     // test for parsable interval string
     if ((/\|/).test(msg)) {
@@ -562,13 +565,13 @@ module.exports = (function() {
     return msg;
   };
 
-  var argsEndWithNamedObject = function(args) {
+  var argsEndWithNamedObject = function (args) {
     return (args.length > 1 &&
       args[args.length - 1] !== null &&
       typeof args[args.length - 1] === 'object');
   };
 
-  var parseArgv = function(args) {
+  var parseArgv = function (args) {
     var namedValues, returnArgs;
 
     if (argsEndWithNamedObject(args)) {
@@ -585,7 +588,7 @@ module.exports = (function() {
   /**
    * registers all public API methods to a given response object when not already declared
    */
-  var applyAPItoObject = function(object) {
+  var applyAPItoObject = function (object) {
 
     var alreadySetted = true;
 
@@ -626,7 +629,7 @@ module.exports = (function() {
   /**
    * tries to guess locales by scanning the given directory
    */
-  var guessLocales = function(directory) {
+  var guessLocales = function (directory) {
     var entries = fs.readdirSync(directory);
     var localesFound = [];
 
@@ -642,7 +645,7 @@ module.exports = (function() {
   /**
    * tries to guess locales from a given filename
    */
-  var guessLocaleFromFile = function(filename) {
+  var guessLocaleFromFile = function (filename) {
     var extensionRegex = new RegExp(extension + '$', 'g');
     var prefixRegex = new RegExp('^' + prefix, 'g');
 
@@ -655,7 +658,7 @@ module.exports = (function() {
    * guess language setting based on http headers
    */
 
-  var guessLanguage = function(request) {
+  var guessLanguage = function (request) {
     if (typeof request === 'object') {
       var languageHeader = request.headers ? request.headers['accept-language'] : undefined,
         languages = [],
@@ -751,7 +754,7 @@ module.exports = (function() {
   /**
    * Get a sorted list of accepted languages from the HTTP Accept-Language header
    */
-  var getAcceptedLanguagesFromHeader = function(header) {
+  var getAcceptedLanguagesFromHeader = function (header) {
     var languages = header.split(','),
       preferences = {};
     return languages.map(function parseLanguagePreference(item) {
@@ -765,7 +768,7 @@ module.exports = (function() {
       preferences[preferenceParts[0]] = preferenceParts[1];
 
       return preferenceParts[0];
-    }).filter(function(lang) {
+    }).filter(function (lang) {
       return preferences[lang] > 0;
     }).sort(function sortLanguages(a, b) {
       return preferences[b] - preferences[a];
@@ -776,7 +779,7 @@ module.exports = (function() {
    * searches for locale in given object
    */
 
-  var getLocaleFromObject = function(obj) {
+  var getLocaleFromObject = function (obj) {
     var locale;
     if (obj && obj.scope) {
       locale = obj.scope.locale;
@@ -790,12 +793,12 @@ module.exports = (function() {
   /**
    * splits and parses a phrase for mathematical interval expressions
    */
-  var parsePluralInterval = function(phrase, count) {
+  var parsePluralInterval = function (phrase, count) {
     var returnPhrase = phrase;
     var phrases = phrase.split(/\|/);
 
     // some() breaks on 1st true
-    phrases.some(function(p) {
+    phrases.some(function (p) {
       var matches = p.match(/^\s*([\(\)\[\]\d,]+)?\s*(.*)$/);
 
       // not the same as in combined condition
@@ -820,7 +823,7 @@ module.exports = (function() {
    * [20,] - all numbers ≥20 (matches: 20, 21, 22, ...)
    * [,20] - all numbers ≤20 (matches: 20, 21, 22, ...)
    */
-  var matchInterval = function(number, interval) {
+  var matchInterval = function (number, interval) {
     interval = parseInterval(interval);
     if (interval && typeof number === 'number') {
       if (interval.from.value === number) {
@@ -839,7 +842,7 @@ module.exports = (function() {
   /**
    * read locale file, translate a msg and write to fs if new
    */
-  var translate = function(locale, singular, plural, skipSyncToAllFiles) {
+  var translate = function (locale, singular, plural, skipSyncToAllFiles) {
 
     // add same key to all translations
     if (!skipSyncToAllFiles && syncFiles) {
@@ -917,7 +920,7 @@ module.exports = (function() {
    * initialize the same key in all locales
    * when not already existing, checked via translate
    */
-  var syncToAllFiles = function(singular, plural) {
+  var syncToAllFiles = function (singular, plural) {
     // iterate over locales and translate again
     // this will implicitly write/sync missing keys
     // to the rest of locales
@@ -937,7 +940,7 @@ module.exports = (function() {
    * @returns {Function} A function that, when invoked, returns the current value stored
    * in the object at the requested location.
    */
-  var localeAccessor = function(locale, singular, allowDelayedTraversal) {
+  var localeAccessor = function (locale, singular, allowDelayedTraversal) {
     // Bail out on non-existent locales to defend against internal errors.
     if (!locales[locale]) return Function.prototype;
 
@@ -949,13 +952,13 @@ module.exports = (function() {
       // The accessor we're trying to find and which we want to return.
       var accessor = null;
       // An accessor that returns null.
-      var nullAccessor = function() {
+      var nullAccessor = function () {
         return null;
       };
       // Do we need to re-traverse the tree upon invocation of the accessor?
       var reTraverse = false;
       // Split the provided term and run the callback for each subterm.
-      singular.split(objectNotation).reduce(function(object, index) {
+      singular.split(objectNotation).reduce(function (object, index) {
         // Make the accessor return null.
         accessor = nullAccessor;
         // If our current target object (in the locale tree) doesn't exist or
@@ -967,7 +970,7 @@ module.exports = (function() {
           return null;
         }
         // We can traverse deeper, so we generate an accessor for this current level.
-        accessor = function() {
+        accessor = function () {
           return object[index];
         };
         // Return a reference to the next deeper level in the locale tree.
@@ -975,7 +978,7 @@ module.exports = (function() {
 
       }, locales[locale]);
       // Return the requested accessor.
-      return function() {
+      return function () {
         // If we need to re-traverse (because we didn't find our target term)
         // traverse again and return the new result (but don't allow further iterations)
         // or return the previously found accessor if it was already valid.
@@ -984,7 +987,7 @@ module.exports = (function() {
 
     } else {
       // No object notation, just return an accessor that performs array lookup.
-      return function() {
+      return function () {
         return locales[locale][singular];
       };
     }
@@ -1003,7 +1006,7 @@ module.exports = (function() {
    * @returns {Function} A function that takes one argument. When the function is
    * invoked, the targeted translation term will be set to the given value inside the locale table.
    */
-  var localeMutator = function(locale, singular, allowBranching) {
+  var localeMutator = function (locale, singular, allowBranching) {
     // Bail out on non-existent locales to defend against internal errors.
     if (!locales[locale]) return Function.prototype;
 
@@ -1015,17 +1018,17 @@ module.exports = (function() {
       // This will become the function we want to return.
       var accessor = null;
       // An accessor that takes one argument and returns null.
-      var nullAccessor = function() {
+      var nullAccessor = function () {
         return null;
       };
       // Fix object path.
-      var fixObject = function() {
+      var fixObject = function () {
         return {};
       };
       // Are we going to need to re-traverse the tree when the mutator is invoked?
       var reTraverse = false;
       // Split the provided term and run the callback for each subterm.
-      singular.split(objectNotation).reduce(function(object, index) {
+      singular.split(objectNotation).reduce(function (object, index) {
         // Make the mutator do nothing.
         accessor = nullAccessor;
         // If our current target object (in the locale tree) doesn't exist or
@@ -1047,12 +1050,12 @@ module.exports = (function() {
           }
         }
         // Generate a mutator for the current level.
-        accessor = function(value) {
+        accessor = function (value) {
           object[index] = value;
           return value;
         };
         // Generate a fixer for the current level.
-        fixObject = function() {
+        fixObject = function () {
           object[index] = {};
           return object[index];
         };
@@ -1063,7 +1066,7 @@ module.exports = (function() {
       }, locales[locale]);
 
       // Return the final mutator.
-      return function(value) {
+      return function (value) {
         // If we need to re-traverse the tree
         // invoke the search again, but allow branching
         // this time (because here the mutator is being invoked)
@@ -1073,7 +1076,7 @@ module.exports = (function() {
 
     } else {
       // No object notation, just return a mutator that performs array lookup and changes the value.
-      return function(value) {
+      return function (value) {
         locales[locale][singular] = value;
         return value;
       };
@@ -1083,7 +1086,7 @@ module.exports = (function() {
   /**
    * try reading a file
    */
-  var read = function(locale) {
+  var read = function (locale) {
     var localeFile = {},
       file = getStorageFilePath(locale);
     try {
@@ -1115,7 +1118,7 @@ module.exports = (function() {
   /**
    * try writing a file in a created directory
    */
-  var write = function(locale) {
+  var write = function (locale) {
     var stats, target, tmp;
 
     // don't write new locale information to disk if updateFiles isn't true
@@ -1157,7 +1160,7 @@ module.exports = (function() {
   /**
    * basic normalization of filepath
    */
-  var getStorageFilePath = function(locale) {
+  var getStorageFilePath = function (locale) {
     // changed API to use .json as default, #16
     var ext = extension || '.json',
       filepath = path.normalize(directory + pathsep + prefix + locale + ext),
